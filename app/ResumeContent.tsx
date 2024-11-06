@@ -462,7 +462,7 @@ const projects = [
                       <div className="flex-1 bg-gray-700 h-2 rounded-full">
                         <div
                           className="bg-green-400 h-2 rounded-full"
-                          style={{ width: `${[90, 70, 95, 85][index]}%` }}
+                          style={{ width: `${[90,90,80,66,70,60][index]}%` }}
                         ></div>
                       </div>
                     </div>
