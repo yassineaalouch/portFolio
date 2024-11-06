@@ -5,6 +5,7 @@ import { ChevronDown, Instagram, Facebook, Linkedin, Lightbulb, Palette, Twitter
 import { css, Global } from '@emotion/react'
 import Link from 'next/link'
 import Image from 'next/image'
+import Head from 'next/head'
 
 const globalStyles = css`
 @keyframes neon-glow {
@@ -264,6 +265,11 @@ const projects = [
   }, []);
 
   return (
+    <>
+    <Head>
+      <title>yassine Aalouch</title> 
+      <link rel="icon" href="/favicon.ico" /> 
+    </Head>
     <div key={key} className="min-h-screen bg-black text-white">
       <Global styles={globalStyles} />
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black' : 'bg-transparent'}`}>
@@ -638,5 +644,6 @@ const projects = [
         </div>
       </footer>
     </div>
+    </>
   )
 }
