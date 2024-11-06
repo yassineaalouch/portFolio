@@ -194,8 +194,7 @@ export default function ResumeContent() {
   ];
 
   let DesignSkillsList = ['Next.js', 'React.js', 'Tailwind CSS', 'Figma', 'Inkscape', 'WordPress'];
-  let LanguageList = ['Arabe', 'Français', 'Anglais'];
-
+  let LanguageList = ['Arabic', 'French', 'English'];
   let KnowledgeList = [
     "Next.js",
     "React.js",
@@ -212,41 +211,42 @@ export default function ResumeContent() {
   ];
 
   let EducationList = [
-    { year: '2022 - present', degree: 'Étudiant en Génie Civil', school: 'Académie internationale Mohammed VI de l\'aviation civile, AIAC' },
-    { year: '2020 - 2022', degree: 'Classe préparatoire', school: 'CPGE Molay Abdelah, Safi' },
-    { year: '2017 - 2020', degree: 'Baccalauréat', school: 'Lycée Mohamed 6, Marrakech' },
-  ];
+    { year: '2022 - present', degree: 'Software engineer Student', school: 'International Academy Mohammed VI of Civil Aviation, AIAC' },
+    { year: '2020 - 2022', degree: 'Preparatory Class', school: 'CPGE Molay Abdelah, Safi' },
+    { year: '2017 - 2020', degree: 'Baccalaureate', school: 'Mohamed 6 High School, Marrakech' },
+];
 
-  const projects = [
+const projects = [
     {
-      title: 'Site internet de location de voitures (pas encore terminé)',
-      description: 'Développement d\'un site web de location de voitures permettant de réserver et de vérifier les plages horaires disponibles.',
-      technologies: ['Next.js', 'Tailwind CSS', 'NextAuth', 'MongoDB', 'Nodemailer'],
-      Screenshots: '/carRental.png', // Mettez à jour avec le lien des captures d'écran si nécessaire
-      link: 'https://rental-car-yassine.vercel.app/',
+        title: 'Car Rental Website (not yet completed)',
+        description: 'Development of a car rental website allowing users to book and check available time slots.',
+        technologies: ['Next.js', 'Tailwind CSS', 'NextAuth', 'MongoDB', 'Nodemailer'],
+        Screenshots: '/carRental.png', // Update with screenshot link if necessary
+        link: 'https://rental-car-yassine.vercel.app/',
     },
     {
-      title: 'Site e-commerce - Reevofeed',
-      description: 'Création d\'un site e-commerce full-stack avec filtrage de produits et gestion des comptes utilisateurs.',
-      technologies: ['Next.js', 'Tailwind CSS', 'NextAuth', 'MongoDB', 'Nodemailer'],
-      Screenshots: '/rvofeed.png',
-      link: 'https://revofeedd.vercel.app/',
+        title: 'E-commerce Site - Reevofeed',
+        description: 'Creation of a full-stack e-commerce site with product filtering and user account management.',
+        technologies: ['Next.js', 'Tailwind CSS', 'NextAuth', 'MongoDB', 'Nodemailer'],
+        Screenshots: '/rvofeed.png',
+        link: 'https://revofeedd.vercel.app/',
     },
     {
-      title: 'Site de consultation juridique en ligne',
-      description: 'Développement d\'un site de consultation pour un consultant juridique permettant la prise de rendez-vous en ligne.',
-      technologies: ['Next.js', 'NextAuth', 'Tailwind CSS', 'MongoDB'],
-      Screenshots: '/consultingSite.png',
-      link: 'https://amine-legal-consulting.vercel.app/',
+        title: 'Online Legal Consulting Site',
+        description: 'Development of a consulting site for a legal consultant, allowing online appointment booking.',
+        technologies: ['Next.js', 'NextAuth', 'Tailwind CSS', 'MongoDB'],
+        Screenshots: '/consultingSite.png',
+        link: 'https://amine-legal-consulting.vercel.app/',
     },
     {
-      title: 'Création d\'un site e-commerce pour un client "AWANI"',
-      description: 'Développement d\'un site e-commerce permettant au client de vendre ses produits en ligne. Le site inclut des fonctionnalités telles que le filtrage des produits, la gestion des comptes utilisateurs et un tableau de bord pour administrer les produits.',
-      technologies: ['Next.js', 'Tailwind CSS', 'NextAuth', 'MongoDB', 'Nodemailer'],
-      Screenshots: '/awani.png', // Mettez à jour avec le lien des captures d'écran si nécessaire
-      link: 'https://awani.vercel.app/', // Remplacez par le lien réel si disponible
+        title: 'E-commerce Site for Client "AWANI"',
+        description: 'Development of an e-commerce site enabling the client to sell products online. The site includes features such as product filtering, user account management, and a dashboard for product administration.',
+        technologies: ['Next.js', 'Tailwind CSS', 'NextAuth', 'MongoDB', 'Nodemailer'],
+        Screenshots: '/awani.png', // Update with screenshot link if necessary
+        link: 'https://awani.vercel.app/', // Replace with the actual link if available
     },
-  ];
+];
+
 
   useEffect(() => {
     const loadVideo = (video: HTMLVideoElement | null) => {
