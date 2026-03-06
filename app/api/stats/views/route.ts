@@ -15,7 +15,7 @@ export async function POST() {
     { upsert: true, returnDocument: "after" }
   );
 
-  const total = result.value?.total ?? 1;
+  const total = result?.value?.total ?? 1;
   return NextResponse.json({ total });
 }
 
