@@ -47,6 +47,7 @@ export default function Navbar({ enabledSections }: NavbarProps) {
   }, []);
 
   const ratiosRef = useRef<Record<string, number>>({});
+  const sectionIdsKey = navItems.map((item) => item.targetId).join(",");
 
   useEffect(() => {
     const sectionIds = navItems.map((item) => item.targetId);
@@ -80,7 +81,9 @@ export default function Navbar({ enabledSections }: NavbarProps) {
     });
 
     return () => observer.disconnect();
-  }, [enabledSections?.join(",") ?? ""]);
+  // sectionIdsKey is stable serialization of navItems to avoid re-running on every render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionIdsKey]);
 
   useEffect(() => {
     if (isMobileOpen) {

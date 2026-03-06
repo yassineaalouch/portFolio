@@ -31,8 +31,9 @@ export async function GET(req: NextRequest) {
     const { labels: dateLabels } = getDateRange(range);
 
     const db = await getDb();
+    type DailyDoc = { date: string | Date; count: number };
     const docs = await db
-      .collection("dailyVisits")
+      .collection<DailyDoc>("dailyVisits")
       .find({ date: { $in: dateLabels } })
       .toArray();
 
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
     dateLabels.forEach((d) => {
       countByDate[d] = 0;
     });
-    docs.forEach((d: { date: string | Date; count: number }) => {
+    docs.forEach((d) => {
       const key =
         typeof d.date === "string"
           ? d.date

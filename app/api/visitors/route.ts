@@ -1,20 +1,28 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 
+type VisitorDoc = {
+  visitorId: string;
+  visitorName?: string;
+  totalVisits: number;
+  lastVisit: Date;
+  sectionVisits?: Record<string, number>;
+};
+
 export async function GET() {
   try {
     const db = await getDb();
 
     const [visitors, viewsDoc, dailyDocs, totalVisitorsCount] = await Promise.all([
       db
-        .collection("visitors")
+        .collection<VisitorDoc>("visitors")
         .find({})
         .sort({ lastVisit: -1 })
         .limit(100)
         .toArray(),
       db.collection("views").findOne({}),
       db
-        .collection("dailyVisits")
+        .collection<{ date: string; count: number }>("dailyVisits")
         .find({})
         .sort({ date: -1 })
         .limit(7)
@@ -32,21 +40,14 @@ export async function GET() {
       footer: 0,
     };
 
-    visitors.forEach((v: { sectionVisits?: Record<string, number> }) => {
+    visitors.forEach((v) => {
       const sv = v.sectionVisits ?? {};
       Object.keys(sectionTotals).forEach((key) => {
         sectionTotals[key] += sv[key] ?? 0;
       });
     });
 
-    const list = visitors.map(
-      (v: {
-        visitorId: string;
-        visitorName?: string;
-        totalVisits: number;
-        lastVisit: Date;
-        sectionVisits?: Record<string, number>;
-      }) => ({
+    const list = visitors.map((v) => ({
         visitorId: v.visitorId,
         visitorName: v.visitorName ?? "visitor",
         totalVisits: v.totalVisits,
@@ -58,8 +59,7 @@ export async function GET() {
           contact: 0,
           footer: 0,
         },
-      })
-    );
+      }));
 
     const dailyTrend = dailyDocs
       .reverse()

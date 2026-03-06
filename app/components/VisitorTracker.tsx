@@ -24,6 +24,8 @@ export default function VisitorTracker({
   const sectionLastTracked = useRef<Record<string, number>>({});
   const visitorIdRef = useRef<string | null>(null);
 
+  const sectionsKey = enabledSections.join(",");
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -98,7 +100,9 @@ export default function VisitorTracker({
     return () => {
       observer?.disconnect();
     };
-  }, [enabledSections.join(",")]);
+  // sectionsKey is stable serialization of enabledSections to avoid unnecessary effect runs
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionsKey]);
 
   return null;
 }
