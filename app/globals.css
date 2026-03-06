@@ -17,5 +17,193 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+.code-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  white-space: nowrap;
+}
+
+.code-line .token-keyword {
+  color: #f472b6;
+}
+
+.code-line .token-variable {
+  color: #38bdf8;
+}
+
+.code-line .token-function {
+  color: #a5b4fc;
+}
+
+.code-line .token-parameter {
+  color: #facc15;
+}
+
+.code-line .token-string {
+  color: #4ade80;
+}
+
+.code-line .token-operator,
+.code-line .token-comma,
+.code-line .token-bracket {
+  color: #64748b;
+}
+
+.scroll-indicator {
+  animation: scroll-indicator 1.5s ease-in-out infinite;
+  transform-origin: top;
+}
+
+@keyframes scroll-indicator {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(100%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(140%);
+    opacity: 0;
+  }
+}
+
+.tech-badge {
+  animation: float-soft 10s ease-in-out infinite;
+}
+
+.tech-badge:nth-child(2) {
+  animation-delay: 1.8s;
+}
+
+.tech-badge:nth-child(3) {
+  animation-delay: 3.6s;
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0px) translateZ(0);
+  }
+  25% {
+    transform: translateY(-6px) translateZ(0);
+  }
+  50% {
+    transform: translateY(0px) translateZ(0);
+  }
+  75% {
+    transform: translateY(4px) translateZ(0);
+  }
+}
+
+/* Projects section: card hover and scroll-in */
+.project-card {
+  will-change: transform, opacity, box-shadow;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(34, 211, 238, 0.12),
+    0 0 40px -10px rgba(34, 211, 238, 0.2);
+}
+
+.project-card-hidden {
+  transform: translateY(24px);
+}
+
+.project-card-visible {
+  transform: translateY(0);
+}
+
+/* Skills section: card hover and scroll-in */
+.skills-card {
+  will-change: transform, opacity, box-shadow;
+}
+
+.skills-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 22px 40px -16px rgba(15, 23, 42, 0.8),
+    0 0 0 1px rgba(129, 140, 248, 0.35),
+    0 0 40px -12px rgba(129, 140, 248, 0.5);
+}
+
+.skills-card-hidden {
+  transform: translateY(24px);
+}
+
+.skills-card-visible {
+  transform: translateY(0);
+}
+
+.skills-floating-badge {
+  animation: float-soft 13s ease-in-out infinite;
+}
+
+/* Contact section: reveal, cards, success pulse */
+.contact-section-hidden {
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+.contact-section-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 500ms ease-out,
+    transform 500ms ease-out;
+}
+
+.contact-card {
+  will-change: transform, box-shadow, border-color;
+}
+
+.contact-floating-badge {
+  animation: float-soft 15s ease-in-out infinite;
+}
+
+.contact-success {
+  animation: contact-success 400ms ease-out;
+}
+
+@keyframes contact-success {
+  0% {
+    transform: translateY(4px);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Footer section */
+.footer-section-hidden {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.footer-section-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 500ms ease-out,
+    transform 500ms ease-out;
+}
+
+.footer-floating-badge {
+  animation: float-soft 16s ease-in-out infinite;
 }
