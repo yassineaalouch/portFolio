@@ -55,6 +55,16 @@ type Visitor = {
   sectionVisits: Record<string, number>;
 };
 
+type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  createdAt: string;
+  read: boolean;
+};
+
 const CATEGORY_GROUP_PREFIXES: Record<string, string[]> = {
   frontend: ["Frontend"],
   backend: ["Backend"],
@@ -364,6 +374,9 @@ export default function DashboardPage() {
   }>({ labels: [], values: [] });
   const [dailyChartLoading, setDailyChartLoading] = useState(true);
 
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const [loading, setLoading] = useState(true);
@@ -388,12 +401,14 @@ export default function DashboardPage() {
           skillsRes,
           sectionsRes,
           visitorsRes,
+          messagesRes,
         ] = await Promise.all([
           fetch("/api/projects"),
           fetch("/api/site/contact"),
           fetch("/api/site/skills"),
           fetch("/api/site/sections"),
           fetch("/api/visitors"),
+          fetch("/api/contact-messages"),
         ]);
 
         const [
@@ -402,12 +417,14 @@ export default function DashboardPage() {
           skillsData,
           sectionsData,
           visitorsData,
+          messagesData,
         ] = await Promise.all([
           projRes.json(),
           contactRes.json(),
           skillsRes.json(),
           sectionsRes.json(),
           visitorsRes.json(),
+          messagesRes.json(),
         ]);
 
         const raw = projData || [];
@@ -459,6 +476,20 @@ export default function DashboardPage() {
         }
         if (Array.isArray(visitorsData?.dailyTrend)) {
           setDailyTrend(visitorsData.dailyTrend);
+        }
+
+        if (Array.isArray(messagesData?.messages)) {
+          setContactMessages(
+            messagesData.messages.map((m: any) => ({
+              id: m.id ?? "",
+              name: m.name ?? "",
+              email: m.email ?? "",
+              subject: m.subject ?? "",
+              message: m.message ?? "",
+              createdAt: m.createdAt ?? "",
+              read: !!m.read,
+            }))
+          );
         }
       } catch (e) {
         console.error(e);
@@ -601,12 +632,12 @@ export default function DashboardPage() {
     setError(null);
     try {
       const uploadOne = async (file: File) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        const res = await fetch("/api/uploads/project-image", {
-          method: "POST",
-          body: formData,
-        });
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/uploads/project-image", {
+        method: "POST",
+        body: formData,
+      });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to upload image");
         return data.url;
@@ -839,6 +870,30 @@ export default function DashboardPage() {
     return date.toLocaleDateString();
   }
 
+  const unreadMessagesCount = contactMessages.filter((m) => !m.read).length;
+
+  const handleToggleMessage = async (message: ContactMessage) => {
+    const isSelected = selectedMessageId === message.id;
+    setSelectedMessageId(isSelected ? null : message.id);
+
+    if (!message.read) {
+      setContactMessages((prev) =>
+        prev.map((m) =>
+          m.id === message.id ? { ...m, read: true } : m
+        )
+      );
+      try {
+        await fetch("/api/contact-messages", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: message.id }),
+        });
+      } catch {
+        // best-effort, on ne casse pas l'UI si l'API échoue
+      }
+    }
+  };
+
   const toggleSectionEnabled = async (section: string) => {
     const next = enabledSections.includes(section)
       ? enabledSections.filter((s) => s !== section)
@@ -917,7 +972,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-4 space-y-5 text-xs text-slate-300">
-            <div>
+          <div>
               <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">
                 Overview
               </p>
@@ -935,7 +990,7 @@ export default function DashboardPage() {
                   <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
                 )}
               </button>
-            </div>
+          </div>
 
             <div>
               <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-slate-500">
@@ -999,7 +1054,7 @@ export default function DashboardPage() {
                 )}
               </button>
             </div>
-          </div>
+            </div>
         </aside>
 
         {/* Main area - left margin so content doesn't sit under fixed sidebar on desktop */}
@@ -1017,7 +1072,7 @@ export default function DashboardPage() {
                     · Yassine Aalouch
                   </span>
                 </h1>
-              </div>
+            </div>
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-slate-950/70 px-3 py-1.5 text-xs text-slate-300 shadow-[0_12px_32px_rgba(15,23,42,0.9)] backdrop-blur-lg sm:flex">
                   <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] text-slate-400">
@@ -1067,14 +1122,14 @@ export default function DashboardPage() {
                     />
                   </span>
                 </button>
-              </div>
-            </header>
+          </div>
+        </header>
 
-            {error && (
-              <div className="mb-6 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                {error}
-              </div>
-            )}
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            {error}
+          </div>
+        )}
 
             {/* Overview */}
             <section id="overview" className="mb-10 space-y-5">
@@ -1140,6 +1195,99 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                <div className="dashboard-card relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/25 via-orange-500/15 to-transparent opacity-70" />
+                  <div className="relative space-y-1">
+                    <p className="text-xs text-slate-400">Messages non lus</p>
+                    <p className="text-2xl font-semibold text-slate-50">
+                      {unreadMessagesCount}
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Depuis le formulaire de contact.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Messages de contact — juste après Overview */}
+            <section className="mb-10 space-y-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-sm font-medium uppercase tracking-[0.28em] text-slate-500">
+                  Messages de contact
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Derniers messages envoyés via le formulaire de contact.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-4 shadow-[0_20px_55px_rgba(15,23,42,0.96)] backdrop-blur-2xl">
+                {contactMessages.length === 0 ? (
+                  <p className="py-4 text-center text-xs text-slate-500">
+                    Aucun message pour le moment.
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-80 overflow-y-auto pr-1 text-xs sm:text-sm">
+                    {contactMessages.map((m) => {
+                      const isSelected = selectedMessageId === m.id;
+                      const isUnread = !m.read;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => handleToggleMessage(m)}
+                          className={`w-full text-left rounded-xl border bg-slate-950/90 p-3 transition ${
+                            isSelected
+                              ? "border-cyan-400/80 shadow-[0_0_30px_rgba(34,211,238,0.45)]"
+                              : "border-slate-800/80 hover:border-cyan-400/60 hover:bg-slate-900/90"
+                          }`}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                {isUnread && (
+                                  <span className="h-2 w-2 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(248,113,113,0.8)]" />
+                                )}
+                                <p
+                                  className={`text-sm ${
+                                    isUnread ? "font-semibold" : "font-medium"
+                                  } text-slate-100`}
+                                >
+                                  {m.name || "Unknown"}
+                                </p>
+                              </div>
+                              <p className="text-[11px] text-slate-400">
+                                {m.email}
+                              </p>
+                            </div>
+                            <span className="text-[11px] text-slate-500">
+                              {formatLastVisit(m.createdAt)}
+                            </span>
+                          </div>
+                          <p
+                            className={`mt-2 text-xs ${
+                              isUnread ? "font-semibold" : "font-medium"
+                            } text-slate-200`}
+                          >
+                            {m.subject}
+                          </p>
+                          <p
+                            className={`mt-1 text-xs text-slate-300 ${
+                              isSelected ? "whitespace-pre-line" : "line-clamp-2"
+                            }`}
+                          >
+                            {m.message}
+                          </p>
+                          {!isSelected && (
+                            <p className="mt-1 text-[10px] text-cyan-400">
+                              Cliquer pour ouvrir
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </section>
 
@@ -1155,7 +1303,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
-                {/* Projects */}
+        {/* Projects */}
                 <section className="rounded-2xl border border-white/10 bg-slate-950/80 p-5 shadow-[0_20px_55px_rgba(15,23,42,0.96)] backdrop-blur-2xl">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
@@ -1168,29 +1316,29 @@ export default function DashboardPage() {
                     </div>
                     <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-cyan-300">
                       Linked to Projects
-                    </span>
-                  </div>
+            </span>
+          </div>
 
                   <div className="mb-5 space-y-3">
-                    <input
+            <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="Title"
-                      value={newProject.title}
-                      onChange={(e) =>
-                        setNewProject((p) => ({ ...p, title: e.target.value }))
-                      }
-                    />
-                    <textarea
+              placeholder="Title"
+              value={newProject.title}
+              onChange={(e) =>
+                setNewProject((p) => ({ ...p, title: e.target.value }))
+              }
+            />
+            <textarea
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="Description"
-                      value={newProject.description}
-                      onChange={(e) =>
-                        setNewProject((p) => ({
-                          ...p,
+              placeholder="Description"
+              value={newProject.description}
+              onChange={(e) =>
+                setNewProject((p) => ({
+                  ...p,
                           description: e.target.value,
-                        }))
-                      }
-                    />
+                }))
+              }
+            />
                     <div>
                       <p className="mb-1.5 text-xs font-medium text-slate-300">Technologies</p>
                       <TechnologiesDropdown
@@ -1212,17 +1360,17 @@ export default function DashboardPage() {
                       <p className="text-xs font-medium text-slate-300">Images (première = affichée par défaut)</p>
                       <div className="flex flex-wrap items-center gap-2">
                         <label className="inline-flex cursor-pointer items-center gap-2">
-                          <input
-                            type="file"
-                            accept="image/*"
+                <input
+                  type="file"
+                  accept="image/*"
                             multiple
                             onChange={handleImageUpload}
-                            className="hidden"
-                          />
+                  className="hidden"
+                />
                           <span className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 py-1 text-[11px] text-cyan-300">
                             Upload (plusieurs)
-                          </span>
-                        </label>
+                </span>
+              </label>
                         <input
                           className="flex-1 min-w-[120px] rounded-lg border border-slate-700/70 bg-slate-950/70 px-2 py-1.5 text-xs text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
                           placeholder="Ou coller une URL"
@@ -1277,12 +1425,12 @@ export default function DashboardPage() {
                           </div>
                         ))}
                       </div>
-                    </div>
-                    <input
+            </div>
+            <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
                       placeholder="Project link (Live Demo)"
-                      value={newProject.link}
-                      onChange={(e) =>
+              value={newProject.link}
+              onChange={(e) =>
                         setNewProject((p) => ({
                           ...p,
                           link: e.target.value,
@@ -1330,31 +1478,31 @@ export default function DashboardPage() {
                           </button>
                         </>
                       ) : (
-                        <button
-                          onClick={handleCreateProject}
-                          disabled={saving}
+            <button
+              onClick={handleCreateProject}
+              disabled={saving}
                           className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-sm font-semibold text-slate-50 shadow-[0_0_26px_rgba(56,189,248,0.7)] transition hover:shadow-[0_0_36px_rgba(56,189,248,0.95)] disabled:cursor-not-allowed disabled:opacity-60"
-                        >
+            >
                           {saving ? "Adding…" : "Add Project"}
-                        </button>
+            </button>
                       )}
                     </div>
-                  </div>
+          </div>
 
                   <div className="max-h-80 space-y-2 overflow-y-auto pr-1 text-sm scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-700/80">
-                    {projects.map((project) => (
-                      <div
-                        key={project._id}
+            {projects.map((project) => (
+              <div
+                key={project._id}
                         className="flex items-start justify-between gap-3 rounded-xl border border-slate-700/70 bg-slate-950/90 p-3"
-                      >
-                        <div>
+              >
+                <div>
                           <p className="text-sm font-semibold text-slate-100">
                             {project.title}
                           </p>
                           <p className="mt-0.5 line-clamp-2 text-xs text-slate-400">
-                            {project.description}
-                          </p>
-                        </div>
+                    {project.description}
+                  </p>
+                </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEditProject(project)}
@@ -1362,19 +1510,19 @@ export default function DashboardPage() {
                           >
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleDeleteProject(project._id)}
+                <button
+                  onClick={() => handleDeleteProject(project._id)}
                             className="text-[11px] font-medium text-red-400 transition hover:text-red-300"
-                          >
-                            Delete
-                          </button>
+                >
+                  Delete
+                </button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
+              </div>
+            ))}
+          </div>
+        </section>
 
-                {/* Contact info */}
+        {/* Contact info */}
                 <section className="rounded-2xl border border-white/10 bg-slate-950/80 p-5 shadow-[0_20px_55px_rgba(15,23,42,0.96)] backdrop-blur-2xl">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
@@ -1387,49 +1535,49 @@ export default function DashboardPage() {
                     </div>
                     <span className="rounded-full bg-purple-500/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-purple-300">
                       Linked to Contact
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <input
+            </span>
+          </div>
+          <div className="space-y-2">
+            <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="Email"
-                      value={contact.email}
-                      onChange={(e) =>
-                        setContact((c) => ({ ...c, email: e.target.value }))
-                      }
-                    />
-                    <input
+              placeholder="Email"
+              value={contact.email}
+              onChange={(e) =>
+                setContact((c) => ({ ...c, email: e.target.value }))
+              }
+            />
+            <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="Phone"
-                      value={contact.phone}
-                      onChange={(e) =>
-                        setContact((c) => ({ ...c, phone: e.target.value }))
-                      }
-                    />
-                    <input
+              placeholder="Phone"
+              value={contact.phone}
+              onChange={(e) =>
+                setContact((c) => ({ ...c, phone: e.target.value }))
+              }
+            />
+            <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="Facebook URL"
-                      value={contact.facebook}
-                      onChange={(e) =>
-                        setContact((c) => ({ ...c, facebook: e.target.value }))
-                      }
-                    />
-                    <input
+              placeholder="Facebook URL"
+              value={contact.facebook}
+              onChange={(e) =>
+                setContact((c) => ({ ...c, facebook: e.target.value }))
+              }
+            />
+            <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="LinkedIn URL"
-                      value={contact.linkedin}
-                      onChange={(e) =>
-                        setContact((c) => ({ ...c, linkedin: e.target.value }))
-                      }
-                    />
-                    <input
+              placeholder="LinkedIn URL"
+              value={contact.linkedin}
+              onChange={(e) =>
+                setContact((c) => ({ ...c, linkedin: e.target.value }))
+              }
+            />
+            <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="GitHub URL"
-                      value={contact.github}
-                      onChange={(e) =>
-                        setContact((c) => ({ ...c, github: e.target.value }))
-                      }
-                    />
+              placeholder="GitHub URL"
+              value={contact.github}
+              onChange={(e) =>
+                setContact((c) => ({ ...c, github: e.target.value }))
+              }
+            />
                     <input
                       className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
                       placeholder="Twitter/X URL"
@@ -1446,18 +1594,18 @@ export default function DashboardPage() {
                         setContact((c) => ({ ...c, location: e.target.value }))
                       }
                     />
-                    <button
-                      onClick={handleSaveContact}
-                      disabled={saving}
+            <button
+              onClick={handleSaveContact}
+              disabled={saving}
                       className="mt-1 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-violet-500 px-4 py-2 text-sm font-semibold text-slate-50 shadow-[0_0_26px_rgba(168,85,247,0.7)] transition hover:shadow-[0_0_36px_rgba(168,85,247,0.95)] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      Save Contact
-                    </button>
-                  </div>
-                </section>
+            >
+              Save Contact
+            </button>
+          </div>
+        </section>
               </div>
 
-              {/* Skills */}
+        {/* Skills */}
               <section className="rounded-2xl border border-white/10 bg-slate-950/80 p-5 shadow-[0_20px_55px_rgba(15,23,42,0.96)] backdrop-blur-2xl">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <div>
@@ -1470,8 +1618,8 @@ export default function DashboardPage() {
                   </div>
                   <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-emerald-300">
                     Linked to Skills
-                  </span>
-                </div>
+            </span>
+          </div>
                 <div className="grid gap-5 text-sm md:grid-cols-2">
                   {(["frontend", "backend", "database", "cloudDevops"] as const).map((key) => {
                     const cat = skills.categories[key] ?? { title: "", description: "", skills: [] };
@@ -1487,30 +1635,30 @@ export default function DashboardPage() {
                           className="mb-2 w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
                           placeholder="Titre (ex: Frontend Development)"
                           value={cat.title}
-                          onChange={(e) =>
-                            setSkills((s) => ({
-                              ...s,
+                onChange={(e) =>
+                  setSkills((s) => ({
+                    ...s,
                               categories: {
                                 ...s.categories,
                                 [key]: { ...cat, title: e.target.value },
                               },
-                            }))
-                          }
-                        />
+                  }))
+                }
+              />
                         <input
                           className="mb-2 w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
                           placeholder="Description"
                           value={cat.description}
-                          onChange={(e) =>
-                            setSkills((s) => ({
-                              ...s,
+                onChange={(e) =>
+                  setSkills((s) => ({
+                    ...s,
                               categories: {
                                 ...s.categories,
                                 [key]: { ...cat, description: e.target.value },
                               },
-                            }))
-                          }
-                        />
+                  }))
+                }
+              />
                         <SkillsDropdown
                           category={key}
                           selected={cat.skills ?? []}
@@ -1519,8 +1667,8 @@ export default function DashboardPage() {
                             const next = current.includes(skill)
                               ? current.filter((s) => s !== skill)
                               : [...current, skill];
-                            setSkills((s) => ({
-                              ...s,
+                  setSkills((s) => ({
+                    ...s,
                               categories: {
                                 ...s.categories,
                                 [key]: { ...cat, skills: next },
@@ -1531,20 +1679,20 @@ export default function DashboardPage() {
                           isOpen={skillsDropdownOpen[key] ?? false}
                           onToggleOpen={() =>
                             setSkillsDropdownOpen((o) => ({ ...o, [key]: !o[key] }))
-                          }
-                        />
-                      </div>
+                }
+              />
+            </div>
                     );
                   })}
-                </div>
-                <button
-                  onClick={handleSaveSkills}
-                  disabled={saving}
+          </div>
+          <button
+            onClick={handleSaveSkills}
+            disabled={saving}
                   className="mt-4 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-[0_0_26px_rgba(52,211,153,0.7)] transition hover:shadow-[0_0_36px_rgba(52,211,153,0.95)] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Save Skills
-                </button>
-              </section>
+          >
+            Save Skills
+          </button>
+        </section>
             </section>
 
             {/* Visitors statistics */}
@@ -1568,8 +1716,8 @@ export default function DashboardPage() {
                   >
                     Export JSON
                   </button>
-                </div>
-              </div>
+        </div>
+      </div>
 
               {/* Visites par projet */}
               <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-4 shadow-[0_20px_55px_rgba(15,23,42,0.96)] backdrop-blur-2xl">
@@ -1816,6 +1964,7 @@ export default function DashboardPage() {
                   </table>
                 </div>
               </div>
+
             </section>
 
             {/* Settings */}
