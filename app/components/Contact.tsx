@@ -151,12 +151,24 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSubmitting) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/contact-messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        // On garde un retour visuel simple sans exposer l'erreur brute
+        setIsSubmitting(false);
+        return;
+      }
+
       setIsSubmitting(false);
       setIsSuccess(true);
       setForm(initialFormState);
@@ -164,7 +176,9 @@ export default function Contact() {
         setIsSuccess(false);
         clearTimeout(timeout);
       }, 2600);
-    }, 900);
+    } catch {
+      setIsSubmitting(false);
+    }
   };
 
   return (
