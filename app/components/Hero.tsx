@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const TYPING_PHRASES = [
   "Yassine Aalouch",
   "software engineer",
-  "IA&Ml engineer",
+  "IA&ML engineer",
 ];
 
 const TYPING_MS = 90;
