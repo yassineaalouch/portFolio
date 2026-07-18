@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 
+const SKILL_KEYS = ["frontend", "backend", "database", "cloudDevops", "aiMl"] as const;
+
 const DEFAULT_CATEGORIES = {
   frontend: {
     title: "Frontend Development",
@@ -22,6 +24,20 @@ const DEFAULT_CATEGORIES = {
     description: "Automating deployment and infrastructure for modern teams.",
     skills: ["Docker", "AWS", "Cloudflare", "CI/CD", "Linux"],
   },
+  aiMl: {
+    title: "AI / Data / ML",
+    description: "Building intelligent systems with machine learning and data pipelines.",
+    skills: [
+      "Python",
+      "TensorFlow",
+      "Keras",
+      "Pandas",
+      "NumPy",
+      "OpenCV",
+      "faster-whisper",
+      "sounddevice",
+    ],
+  },
 };
 
 function parseSkills(val: unknown): string[] {
@@ -37,7 +53,7 @@ export async function GET() {
 
   const categories = doc.categories ?? {};
   const result: Record<string, { title: string; description: string; skills: string[] }> = {};
-  for (const key of ["frontend", "backend", "database", "cloudDevops"] as const) {
+  for (const key of SKILL_KEYS) {
     const c = categories[key];
     result[key] = {
       title: (c?.title ?? DEFAULT_CATEGORIES[key].title) as string,
@@ -53,12 +69,12 @@ export async function PUT(req: NextRequest) {
   const db = await getDb();
 
   const categories: Record<string, { title: string; description: string; skills: string[] }> = {};
-  for (const key of ["frontend", "backend", "database", "cloudDevops"] as const) {
+  for (const key of SKILL_KEYS) {
     const c = body.categories?.[key] ?? body[key];
     categories[key] = {
       title: typeof c?.title === "string" ? c.title : DEFAULT_CATEGORIES[key].title,
       description: typeof c?.description === "string" ? c.description : DEFAULT_CATEGORIES[key].description,
-      skills: parseSkills(c?.skills ?? []),
+      skills: parseSkills(c?.skills ?? DEFAULT_CATEGORIES[key].skills),
     };
   }
 
@@ -70,4 +86,3 @@ export async function PUT(req: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
-

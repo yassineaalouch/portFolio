@@ -157,7 +157,7 @@ export default function Contact() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/contact-messages", {
+      const res = await fetch("/api/site/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

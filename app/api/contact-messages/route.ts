@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
 type MessageDoc = {
-  _id?: unknown;
+  _id?: ObjectId;
   name: string;
   email: string;
   subject: string;

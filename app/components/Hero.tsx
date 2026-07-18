@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 
 const TYPING_PHRASES = [
   "Yassine Aalouch",
-  "full stack developer",
-  "freelancer",
   "software engineer",
+  "IA&Ml engineer",
 ];
 
 const TYPING_MS = 90;
@@ -72,7 +71,7 @@ export default function Hero() {
         <div className="max-w-xl space-y-4 md:space-y-5">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span>Freelance Software Engineer • Full Stack Web Developer</span>
+            <span>Software Engineer • AI &amp; ML Engineer</span>
           </div>
 
           <div className="space-y-2">
@@ -92,15 +91,15 @@ export default function Hero() {
               </span>
             </h1>
             <p className="text-balance text-sm text-slate-300 sm:text-base md:text-lg">
-              Freelance Software Engineer &amp; Web Designer building scalable web
-              applications and modern digital experiences.
+              Software Engineer &amp; AI/ML Engineer building intelligent systems,
+              agents, and data-driven applications.
             </p>
           </div>
 
           <p className="max-w-lg text-sm text-slate-400 sm:text-base">
-            I specialize in full-stack development, cloud architecture, and
-            building high-performance web platforms. Available for remote
-            projects worldwide.
+            I specialize in machine learning, AI agents, RAG pipelines, and
+            full-stack platforms that connect models to real products. Available
+            for remote projects worldwide.
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
@@ -164,7 +163,7 @@ export default function Hero() {
                       Live coding session
                     </p>
                     <p className="text-[10px] text-slate-500">
-                      full-stack • performance • cloud
+                      AI/ML • agents • full-stack
                     </p>
                   </div>
                 </div>
@@ -253,14 +252,14 @@ export default function Hero() {
           </div>
 
           <div className="pointer-events-none absolute -right-3 top-10 flex flex-col gap-3">
-            <TechBadge label="React" color="from-cyan-400 to-sky-400" />
-            <TechBadge label="Next.js" color="from-slate-100 to-slate-400" />
-            <TechBadge label="Node.js" color="from-emerald-400 to-lime-400" />
+            <TechBadge label="Python" color="from-cyan-400 to-sky-400" />
+            <TechBadge label="TensorFlow" color="from-slate-100 to-slate-400" />
+            <TechBadge label="NumPy" color="from-emerald-400 to-lime-400" />
           </div>
 
           <div className="pointer-events-none absolute -left-4 bottom-4 flex flex-col gap-3">
-            <TechBadge label="Docker" color="from-sky-400 to-blue-500" />
-            <TechBadge label="Cloud" color="from-violet-400 to-fuchsia-500" />
+            <TechBadge label="OpenCV" color="from-sky-400 to-blue-500" />
+            <TechBadge label="Pandas" color="from-violet-400 to-fuchsia-500" />
           </div>
         </div>
       </div>
@@ -281,11 +280,11 @@ type TechBadgeProps = {
 };
 
 const TECH_BADGE_ICON_SLUGS: Record<string, string> = {
-  React: "react",
-  "Next.js": "nextdotjs",
-  "Node.js": "nodedotjs",
-  Docker: "docker",
-  Cloud: "cloudflare",
+  Python: "python",
+  TensorFlow: "tensorflow",
+  NumPy: "numpy",
+  OpenCV: "opencv",
+  Pandas: "pandas",
 };
 
 function TechBadge({ label, color }: TechBadgeProps) {

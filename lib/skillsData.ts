@@ -539,6 +539,19 @@ export const SKILLS_CATALOG: { group: string; skills: { label: string; slug: str
       { label: "Caddy", slug: "caddy" },
     ],
   },
+  {
+    group: "AI / Data / ML",
+    skills: [
+      { label: "Python", slug: "python" },
+      { label: "TensorFlow", slug: "tensorflow" },
+      { label: "Keras", slug: "keras" },
+      { label: "Pandas", slug: "pandas" },
+      { label: "NumPy", slug: "numpy" },
+      { label: "OpenCV", slug: "opencv" },
+      { label: "faster-whisper", slug: "openai" },
+      { label: "sounddevice", slug: "python" },
+    ],
+  },
 ];
 
 /** Flat list of all skills for quick lookup */

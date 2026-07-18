@@ -6,7 +6,8 @@ type SkillCategoryId =
   | "frontend"
   | "backend"
   | "database"
-  | "cloud-devops";
+  | "cloud-devops"
+  | "ai-ml";
 
 type SkillCategory = {
   id: SkillCategoryId;
@@ -20,14 +21,23 @@ const CATEGORY_IDS: SkillCategoryId[] = [
   "backend",
   "database",
   "cloud-devops",
+  "ai-ml",
 ];
+
+const API_KEY_BY_ID: Record<SkillCategoryId, string> = {
+  frontend: "frontend",
+  backend: "backend",
+  database: "database",
+  "cloud-devops": "cloudDevops",
+  "ai-ml": "aiMl",
+};
 
 function mapApiToCategories(data: {
   categories?: Record<string, { title?: string; description?: string; skills?: string[] }>;
 }): SkillCategory[] {
   const cats = data?.categories ?? {};
   return CATEGORY_IDS.map((id) => {
-    const key = id === "cloud-devops" ? "cloudDevops" : id;
+    const key = API_KEY_BY_ID[id];
     const c = cats[key];
     const defaults: Record<SkillCategoryId, SkillCategory> = {
       frontend: {
@@ -53,6 +63,21 @@ function mapApiToCategories(data: {
         title: "Cloud & DevOps",
         description: "Automating deployment and infrastructure for modern teams.",
         skills: ["Docker", "AWS", "Cloudflare", "CI/CD", "Linux"],
+      },
+      "ai-ml": {
+        id: "ai-ml",
+        title: "AI / Data / ML",
+        description: "Building intelligent systems with machine learning and data pipelines.",
+        skills: [
+          "Python",
+          "TensorFlow",
+          "Keras",
+          "Pandas",
+          "NumPy",
+          "OpenCV",
+          "faster-whisper",
+          "sounddevice",
+        ],
       },
     };
     const def = defaults[id];
@@ -151,19 +176,19 @@ export default function Skills() {
 
       {/* Floating badges */}
       <div className="pointer-events-none absolute inset-0">
-        <FloatingSkillBadge label="React" className="left-[6%] top-[16%]" />
+        <FloatingSkillBadge label="Python" className="left-[6%] top-[16%]" />
         <FloatingSkillBadge
-          label="Next.js"
+          label="TensorFlow"
           className="right-[10%] top-[26%]"
           variant="neutral"
         />
         <FloatingSkillBadge
-          label="Node.js"
+          label="NumPy"
           className="left-[12%] bottom-[18%]"
           variant="green"
         />
         <FloatingSkillBadge
-          label="AWS"
+          label="OpenCV"
           className="right-[14%] bottom-[22%]"
           variant="amber"
         />
@@ -176,8 +201,8 @@ export default function Skills() {
             Skills &amp; Tech Stack
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-slate-400 sm:text-lg">
-            Technologies and tools I use to build modern, scalable, and
-            high-performance applications.
+            From full-stack platforms to AI/ML pipelines — the tools I use to
+            build intelligent, scalable products.
           </p>
         </div>
 

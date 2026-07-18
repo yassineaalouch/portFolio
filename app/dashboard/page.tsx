@@ -38,14 +38,19 @@ type SkillCategory = {
   skills: string[];
 };
 
+type SkillCategoryKey = "frontend" | "backend" | "database" | "cloudDevops" | "aiMl";
+
 type SkillsConfig = {
-  categories: {
-    frontend: SkillCategory;
-    backend: SkillCategory;
-    database: SkillCategory;
-    cloudDevops: SkillCategory;
-  };
+  categories: Record<SkillCategoryKey, SkillCategory>;
 };
+
+const PROJECT_CATEGORY_OPTIONS = [
+  { value: "web-apps", label: "Web Apps" },
+  { value: "full-stack", label: "Full Stack" },
+  { value: "open-source", label: "Open Source" },
+  { value: "experiments", label: "Experiments" },
+  { value: "ia-ml", label: "IA&ML" },
+] as const;
 
 type Visitor = {
   visitorId: string;
@@ -70,6 +75,15 @@ const CATEGORY_GROUP_PREFIXES: Record<string, string[]> = {
   backend: ["Backend"],
   database: ["Database"],
   cloudDevops: ["Cloud / DevOps", "Productivity", "Desktop / Mobile"],
+  aiMl: ["AI / Data / ML"],
+};
+
+const SKILL_CATEGORY_LABELS: Record<SkillCategoryKey, string> = {
+  frontend: "Frontend",
+  backend: "Backend",
+  database: "Database",
+  cloudDevops: "Cloud & DevOps",
+  aiMl: "AI / Data / ML",
 };
 
 function TechnologiesDropdown({
@@ -205,7 +219,7 @@ function SkillsDropdown({
   openKey: string;
   isOpen: boolean;
   onToggleOpen: () => void;
-  category: "frontend" | "backend" | "database" | "cloudDevops";
+  category: SkillCategoryKey;
 }) {
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -355,6 +369,11 @@ export default function DashboardPage() {
       backend: { title: "Backend Development", description: "Designing robust APIs and services that scale.", skills: [] },
       database: { title: "Database", description: "Modeling data for reliability, performance, and simplicity.", skills: [] },
       cloudDevops: { title: "Cloud & DevOps", description: "Automating deployment and infrastructure for modern teams.", skills: [] },
+      aiMl: {
+        title: "AI / Data / ML",
+        description: "Building intelligent systems with machine learning and data pipelines.",
+        skills: ["Python", "TensorFlow", "Keras", "Pandas", "NumPy", "OpenCV", "faster-whisper", "sounddevice"],
+      },
     },
   });
 
@@ -393,6 +412,14 @@ export default function DashboardPage() {
   ]);
 
   useEffect(() => {
+    const safeJson = async (res: Response) => {
+      try {
+        return await res.json();
+      } catch {
+        return null;
+      }
+    };
+
     const load = async () => {
       try {
         const [
@@ -408,7 +435,7 @@ export default function DashboardPage() {
           fetch("/api/site/skills"),
           fetch("/api/site/sections"),
           fetch("/api/visitors"),
-          fetch("/api/contact-messages"),
+          fetch("/api/site/messages"),
         ]);
 
         const [
@@ -419,15 +446,15 @@ export default function DashboardPage() {
           visitorsData,
           messagesData,
         ] = await Promise.all([
-          projRes.json(),
-          contactRes.json(),
-          skillsRes.json(),
-          sectionsRes.json(),
-          visitorsRes.json(),
-          messagesRes.json(),
+          safeJson(projRes),
+          safeJson(contactRes),
+          safeJson(skillsRes),
+          safeJson(sectionsRes),
+          safeJson(visitorsRes),
+          safeJson(messagesRes),
         ]);
 
-        const raw = projData || [];
+        const raw = Array.isArray(projData) ? projData : [];
         setProjects(
           raw.map((p: Project) => {
             const images = Array.isArray(p.images)
@@ -455,12 +482,18 @@ export default function DashboardPage() {
           location: contactData?.location || "",
         });
         const cats = skillsData?.categories ?? {};
+        const defaultAiMl = {
+          title: "AI / Data / ML",
+          description: "Building intelligent systems with machine learning and data pipelines.",
+          skills: ["Python", "TensorFlow", "Keras", "Pandas", "NumPy", "OpenCV", "faster-whisper", "sounddevice"],
+        };
         setSkills({
           categories: {
             frontend: cats.frontend ?? { title: "Frontend Development", description: "Building fast, accessible, and delightful user interfaces.", skills: [] },
             backend: cats.backend ?? { title: "Backend Development", description: "Designing robust APIs and services that scale.", skills: [] },
             database: cats.database ?? { title: "Database", description: "Modeling data for reliability, performance, and simplicity.", skills: [] },
             cloudDevops: cats.cloudDevops ?? { title: "Cloud & DevOps", description: "Automating deployment and infrastructure for modern teams.", skills: [] },
+            aiMl: cats.aiMl ?? defaultAiMl,
           },
         });
 
@@ -756,12 +789,6 @@ export default function DashboardPage() {
     }
   };
 
-  const parseList = (value: string) =>
-    value
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
   const [skillsDropdownOpen, setSkillsDropdownOpen] = useState<Record<string, boolean>>({});
   const [technologiesDropdownOpen, setTechnologiesDropdownOpen] = useState(false);
 
@@ -883,7 +910,7 @@ export default function DashboardPage() {
         )
       );
       try {
-        await fetch("/api/contact-messages", {
+        await fetch("/api/site/messages", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: message.id }),
@@ -1088,6 +1115,14 @@ export default function DashboardPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={async () => {
+                    try {
+                      await fetch("/api/auth/logout", { method: "POST" });
+                    } catch {
+                      // clear locally even if API fails
+                    }
+                    window.location.href = "/login";
+                  }}
                   className="hidden items-center gap-2 rounded-full border border-white/10 bg-slate-950/80 px-3 py-1.5 text-xs font-medium text-slate-200 shadow-[0_12px_32px_rgba(15,23,42,0.9)] backdrop-blur-lg sm:inline-flex"
                 >
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 via-sky-500 to-purple-500 text-[10px] font-semibold text-slate-950">
@@ -1448,17 +1483,41 @@ export default function DashboardPage() {
                         }))
                       }
                     />
-                    <input
-                      className="w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"
-                      placeholder="Categories (e.g. full-stack, web-apps, open-source, experiments)"
-                      value={(newProject.categories ?? []).join(", ")}
-                      onChange={(e) =>
-                        setNewProject((p) => ({
-                          ...p,
-                          categories: parseList(e.target.value),
-                        }))
-                      }
-                    />
+                    <div>
+                      <p className="mb-1.5 text-xs font-medium text-slate-300">
+                        Categories
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {PROJECT_CATEGORY_OPTIONS.map((opt) => {
+                          const selected = (newProject.categories ?? []).includes(
+                            opt.value
+                          );
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => {
+                                const current = newProject.categories ?? [];
+                                const next = selected
+                                  ? current.filter((c) => c !== opt.value)
+                                  : [...current, opt.value];
+                                setNewProject((p) => ({
+                                  ...p,
+                                  categories: next,
+                                }));
+                              }}
+                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                                selected
+                                  ? "bg-cyan-500/30 text-cyan-200 ring-1 ring-cyan-400/50"
+                                  : "border border-slate-700/70 bg-slate-950/70 text-slate-300 hover:border-slate-500"
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {editingProject ? (
                         <>
@@ -1613,7 +1672,7 @@ export default function DashboardPage() {
                       Skills &amp; Tech Stack
                     </h3>
                     <p className="text-xs text-slate-400">
-                      Contenu des 4 cartes de la section Skills sur la homepage.
+                      Contenu des cartes de la section Skills sur la homepage.
                     </p>
                   </div>
                   <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-emerald-300">
@@ -1621,7 +1680,7 @@ export default function DashboardPage() {
             </span>
           </div>
                 <div className="grid gap-5 text-sm md:grid-cols-2">
-                  {(["frontend", "backend", "database", "cloudDevops"] as const).map((key) => {
+                  {(["frontend", "backend", "database", "cloudDevops", "aiMl"] as SkillCategoryKey[]).map((key) => {
                     const cat = skills.categories[key] ?? { title: "", description: "", skills: [] };
                     return (
                       <div
@@ -1629,7 +1688,7 @@ export default function DashboardPage() {
                         className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-4"
                       >
                         <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
-                          {key === "cloudDevops" ? "Cloud & DevOps" : key}
+                          {SKILL_CATEGORY_LABELS[key]}
                         </p>
                         <input
                           className="mb-2 w-full rounded-lg border border-slate-700/70 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/70"

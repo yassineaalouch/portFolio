@@ -98,6 +98,42 @@ const PROJECTS = [
     categories: ["E-commerce", "Internship"],
     images: [],
   },
+  {
+    title: "AI Research Paper Assistant",
+    description:
+      "Assistant multimodal intelligent pour l'analyse et l'interrogation d'articles scientifiques. Système RAG multimodal avec ingestion PDF vision-aware, recherche vectorielle FAISS shardée, génération ancrée avec citations, artefacts scientifiques structurés et évaluation native de la qualité RAG.",
+    technologies: [
+      "Python",
+      "FastAPI",
+      "Next.js",
+      "TypeScript",
+      "FAISS",
+      "Google Gemini",
+      "Claude",
+      "MongoDB",
+    ],
+    link: "",
+    codeUrl: "https://github.com/yassineaalouch/AI-Research-Paper-Assistant",
+    categories: ["web-apps", "full-stack", "experiments", "ia-ml"],
+    images: [],
+  },
+  {
+    title: "H-OSAR--Hybrid-OS-Agent-Router",
+    description:
+      "Agent PC local-first qui route des prompts multilingues (Darija / Français / Anglais) vers des outils OS, navigateur et documents. Orchestrateur hybride avec Ollama en local, escalation Claude optionnelle pour le raisonnement complexe, et policy gates pour les actions à risque.",
+    technologies: [
+      "Python",
+      "Ollama",
+      "Playwright",
+      "PyAutoGUI",
+      "Faster-Whisper",
+      "Anthropic Claude",
+    ],
+    link: "",
+    codeUrl: "https://github.com/yassineaalouch/-H-OSAR--Hybrid-OS-Agent-Router",
+    categories: ["experiments", "open-source", "ia-ml"],
+    images: [],
+  },
 ];
 
 const SKILLS = {
@@ -151,6 +187,21 @@ const SKILLS = {
       "Vitest",
     ],
   },
+  aiMl: {
+    title: "AI / Data / ML",
+    description:
+      "Building intelligent systems with machine learning and data pipelines.",
+    skills: [
+      "Python",
+      "TensorFlow",
+      "Keras",
+      "Pandas",
+      "NumPy",
+      "OpenCV",
+      "faster-whisper",
+      "sounddevice",
+    ],
+  },
 };
 
 async function main() {
@@ -193,7 +244,7 @@ async function main() {
       { $set: { categories: SKILLS, updatedAt: new Date() } },
       { upsert: true }
     );
-    console.log("✅ Skills mis à jour (frontend, backend, database, cloudDevops)");
+    console.log("✅ Skills mis à jour (frontend, backend, database, cloudDevops, aiMl)");
 
     console.log("\n🎉 Import terminé avec succès !");
   } catch (err) {

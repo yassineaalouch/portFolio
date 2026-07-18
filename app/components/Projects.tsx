@@ -8,7 +8,16 @@ type ProjectCategory =
   | "web-apps"
   | "full-stack"
   | "open-source"
-  | "experiments";
+  | "experiments"
+  | "ia-ml";
+
+const VALID_CATEGORIES: ProjectCategory[] = [
+  "web-apps",
+  "full-stack",
+  "open-source",
+  "experiments",
+  "ia-ml",
+];
 
 type Project = {
   id: string;
@@ -29,6 +38,7 @@ const FILTERS: { value: ProjectCategory; label: string }[] = [
   { value: "full-stack", label: "Full Stack" },
   { value: "open-source", label: "Open Source" },
   { value: "experiments", label: "Experiments" },
+  { value: "ia-ml", label: "IA&ML" },
 ];
 
 const DEFAULT_GRADIENTS = [
@@ -70,7 +80,7 @@ function mapApiProjectToProject(item: ProjectFromApi, index: number): Project {
     : DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
   const rawCategories = item.categories ?? [];
   const categories = rawCategories.filter((c): c is ProjectCategory =>
-    ["web-apps", "full-stack", "open-source", "experiments"].includes(c)
+    VALID_CATEGORIES.includes(c as ProjectCategory)
   ) as ProjectCategory[];
   return {
     id,
