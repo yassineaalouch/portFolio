@@ -134,6 +134,23 @@ const PROJECTS = [
     categories: ["experiments", "open-source", "ia-ml"],
     images: [],
   },
+  {
+    title: "VisionTube",
+    description:
+      "Contrôle multimodal de YouTube sans clavier : détection de gestes de la main en temps réel (webcam, OpenCV, MediaPipe Hand Landmarker) et commandes vocales (SpeechRecognition), qui simulent les raccourcis YouTube via PyAutoGUI. Architecture multithreadée avec cooldown et confirmation multi-frames pour limiter les faux positifs.",
+    technologies: [
+      "Python",
+      "OpenCV",
+      "MediaPipe",
+      "SpeechRecognition",
+      "PyAutoGUI",
+      "NumPy",
+    ],
+    link: "",
+    codeUrl: "https://github.com/yassineaalouch/VisionTube",
+    categories: ["experiments", "ia-ml", "open-source"],
+    images: [],
+  },
 ];
 
 const SKILLS = {
@@ -198,6 +215,9 @@ const SKILLS = {
       "Pandas",
       "NumPy",
       "OpenCV",
+      "MediaPipe",
+      "SpeechRecognition",
+      "PyAutoGUI",
       "faster-whisper",
       "sounddevice",
     ],
